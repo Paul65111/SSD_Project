@@ -314,3 +314,89 @@ app.get('/bookings', async (req, res) => {
         }).populate('place'))
     })
 })
+app.get('/admin-users', async (req, res) => {
+    res.json(await User.find({
+        _id: {
+            $ne: "6554a24e39d372c92793e076"
+        }
+    }));
+})
+app.get('/admin-users/:id', async (req, res) => {
+    const {
+        id
+    } = req.params;
+    res.json(await User.findById(id));
+});
+app.get('/admin-bookings/:id', async (req, res) => {
+    const {
+        id
+    } = req.params;
+    res.json(await Booking.findById(id));
+});
+app.put('/admin-users', async (req, res) => {
+    const {
+        token
+    } = req.cookies;
+    const {
+        id,
+        email,
+        name
+    } = req.body;
+    jwt.verify(token, jwtSecret, {}, async () => {
+        const userDoc = await User.findById(id);
+        userDoc.set({
+            email,
+            name
+        });
+        await userDoc.save();
+        res.json('ok');
+    });
+})
+app.put('/admin-bookings', async (req, res) => {
+    const {
+        token
+    } = req.cookies;
+    const {
+        id,
+        place,
+        user,
+        checkIn,
+        checkOut,
+        price,
+        name
+    } = req.body;
+    jwt.verify(token, jwtSecret, {}, async () => {
+        const bookingDoc = await Booking.findById(id);
+        bookingDoc.set({
+            place,
+            user,
+            checkIn,
+            checkOut,
+            price,
+            name
+        });
+        await bookingDoc.save();
+        res.json('ok');
+    });
+})
+app.delete('/admin-users/:id', async (req, res) => {
+    const {
+        id
+    } = req.params;
+    await User.findById(id).deleteOne();
+    res.json('ok');
+})
+app.delete('/admin-bookings/:id', async (req, res) => {
+    const {
+        id
+    } = req.params;
+    await Booking.findById(id).deleteOne();
+    res.json('ok');
+})
+app.get('/admin-places', async (req, res) => {
+    res.json(await Place.find());
+});
+app.get('/admin-bookings', async (req, res) => {
+    res.json(await Booking.find().populate('place'));
+})
+app.listen(4000);
